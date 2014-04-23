@@ -62,7 +62,8 @@ before_install:
 
 install:
  - cabal-1.18 update
- - cabal-1.18 install --only-dependencies --enable-tests --enable-benchmarks
+ - cabal-1.18 install --only-dependencies --enable-tests --enable-benchmarks --enable-library-coverage
+ - cabal-1.18 install hpc-coveralls --avoid-reinstalls
 
 # Here starts the actual work to be performed for the package under
 # test; any command which exits with a non-zero exit code causes the
@@ -90,5 +91,8 @@ script:
       echo "expected '$SRC_TGZ' not found";
       exit 1;
    fi
+
+after_script:
+ - hpc-coveralls test-suite
 
 # EOF
