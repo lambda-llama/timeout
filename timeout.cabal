@@ -44,7 +44,7 @@ Test-suite timeout-tests
 
       , tasty
       , tasty-quickcheck
-      , QuickCheck
+      , QuickCheck       >= 2.7
 
 Source-repository head
     Type:     git
