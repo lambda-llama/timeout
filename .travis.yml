@@ -69,7 +69,7 @@ script:
  - cabal-1.18 build
 
  - run-cabal-test --cabal-name=cabal-1.18 --show-details=always
- - hpc-coveralls test-suite
+ - hpc-coveralls timeout-tests
 
  - cabal-1.18 check
 
