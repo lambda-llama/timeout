@@ -69,7 +69,8 @@ script:
  - cabal-1.18 build
 
  - run-cabal-test --cabal-name=cabal-1.18 --show-details=always
- - find dist/hpc
+ - hpc-coveralls test-suite
+
  - cabal-1.18 check
 
  # tests that a source-distribution can be generated
@@ -84,9 +85,5 @@ script:
       echo "expected '$SRC_TGZ' not found";
       exit 1;
    fi
-
-after_script:
- - find dist/hpc
- - hpc-coveralls timeout-tests
 
 # EOF
