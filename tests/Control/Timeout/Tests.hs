@@ -4,7 +4,7 @@
 module Control.Timeout.Tests (tests) where
 
 import Control.Exception (SomeException, try)
-import Data.Maybe (isJust)
+import Data.Maybe (isJust, isNothing)
 import Data.Time.Clock (diffUTCTime, getCurrentTime)
 
 import Test.Tasty (TestTree, testGroup)
@@ -30,6 +30,25 @@ testOtherException = monadicIO $ do
         Right _ -> False
         Left (_ :: SomeException) -> True
 
+-- | Test is 'timeout' works.
+testTimedOut :: Property
+testTimedOut = monadicIO $ do
+    res <- run $ timeout 0.1 $ sleep 0.2
+    assert $ isNothing res
+
+-- | Test is 'timeout' works even in negative case.
+testNotTimedOut :: Property
+testNotTimedOut = monadicIO $ do
+    res <- run $ timeout 0.2 $ sleep 0.1
+    assert $ isJust res
+
+-- | Test is forked timeout thread killed properly.
+testKillThreadKilled :: Property
+testKillThreadKilled = monadicIO $ do
+    run $ timeout 0.1 $ return ()
+    run $ sleep 0.2
+    assert True
+
 -- | Test is 'sleep' actually sleep.
 testSleep :: SmallInterval -> Property
 testSleep (SmallInterval interval) = monadicIO $ do
@@ -45,5 +64,8 @@ testSleep (SmallInterval interval) = monadicIO $ do
 tests :: TestTree
 tests = testGroup "Control.Timeout.Tests"
     [ testProperty "timeout pass exceptions" $ once $ testOtherException
+    , testProperty "timed out" $ once testTimedOut
+    , testProperty "not timed out" $ once testNotTimedOut
+    , testProperty "kill thread killed" $ once testKillThreadKilled
     , testProperty "sleep" testSleep
     ]
