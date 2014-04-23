@@ -4,8 +4,8 @@ timeout [![Build Status][travis-img]][travis]  [![Build Status][coveralls-img]][
 [travis]: http://travis-ci.org/lambda-llama/timeout
 [travis-img]: https://secure.travis-ci.org/lambda-llama/timeout.png
 
-[coveralls]: https://coveralls.io/r/maoe/influxdb-haskell?branch=develop
-[coveralls-img]: https://coveralls.io/repos/maoe/influxdb-haskell/badge.png
+[coveralls]: https://coveralls.io/r/lambda-llama/timeout
+[coveralls-img]: https://coveralls.io/repos/lambda-llama/timeout/badge.png
 
 Example
 -------
