@@ -21,7 +21,7 @@ Library
     Default-language: Haskell2010
 
     Build-depends:
-        base
+        base < 5
       , time
       , mtl
       , exceptions
