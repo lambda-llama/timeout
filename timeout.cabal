@@ -1,0 +1,50 @@
+Name:               timeout
+Version:            0.0.0
+Synopsis:           Simple interface for IO time operations
+Description:        Simple interface for IO time operations
+License:            MIT
+License-file:       LICENSE
+Copyright:          Selectel
+Author:             Fedor Gogolev <knsd@knsd.net>
+Maintainer:         knsd@knsd.net
+Homepage:           https://github.com/lambda-llama/timeout
+Bug-reports:        https://github.com/lambda-llama/timeout/issues
+Category:           Concurrency, Control
+Stability:          Alpha
+Build-type:         Simple
+Cabal-version:      >= 1.12
+Tested-with:        GHC == 7.6.*
+
+Library
+    Hs-source-dirs:   src
+    Ghc-options:      -Wall -fno-warn-orphans
+    Default-language: Haskell2010
+
+    Build-depends:
+        base
+      , time
+      , mtl
+      , exceptions
+
+    Exposed-modules:
+        Control.Timeout
+
+Test-suite timeout-tests
+    Main-is:          Tests.hs
+    Hs-source-dirs:   src, tests
+    Default-language: Haskell2010
+    Type:             exitcode-stdio-1.0
+
+    Build-depends:
+        base
+      , time
+      , mtl
+      , exceptions
+
+      , tasty
+      , tasty-quickcheck
+      , QuickCheck
+
+Source-repository head
+    Type:     git
+    Location: https://github.com/lambda-llama/timeout
