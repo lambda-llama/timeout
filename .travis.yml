@@ -69,6 +69,7 @@ script:
  - cabal-1.18 build
 
  - run-cabal-test --cabal-name=cabal-1.18 --show-details=always
+ - find dist/hpc
  - cabal-1.18 check
 
  # tests that a source-distribution can be generated
@@ -85,6 +86,7 @@ script:
    fi
 
 after_script:
+ - find dist/hpc
  - hpc-coveralls timeout-tests
 
 # EOF
