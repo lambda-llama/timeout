@@ -1,6 +1,6 @@
 -- |
 -- Module     : Control.Timeout
--- Copyright  : (c) Selectel
+-- Copyright  : 2014 Fedor Gogolev, 2013 Selectel
 -- License    : MIT
 -- Maintainer : Fedor Gogolev <knsd@knsd.net>
 -- Stability  : unstable

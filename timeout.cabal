@@ -4,7 +4,8 @@ Synopsis:           Simple interface for IO time operations
 Description:        Simple interface for IO time operations
 License:            MIT
 License-file:       LICENSE
-Copyright:          Selectel
+Copyright:          2014 Fedor Gogolev
+                    2013 Selectel
 Author:             Fedor Gogolev <knsd@knsd.net>
 Maintainer:         knsd@knsd.net
 Homepage:           https://github.com/lambda-llama/timeout
