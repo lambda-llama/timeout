@@ -2,10 +2,10 @@ timeout [![Build Status][travis-img]][travis]  [![Build Status][coveralls-img]][
 =======
 
 [travis]: http://travis-ci.org/lambda-llama/timeout
-[travis-img]: https://secure.travis-ci.org/lambda-llama/timeout.png
+[travis-img]: http://img.shields.io/travis/lambda-llama/timeout.svg?style=flat
 
 [coveralls]: https://coveralls.io/r/lambda-llama/timeout
-[coveralls-img]: https://coveralls.io/repos/lambda-llama/timeout/badge.png
+[coveralls-img]: http://img.shields.io/coveralls/lambda-llama/timeout.svg?style=flat
 
 Example
 -------
