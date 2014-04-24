@@ -16,6 +16,10 @@ Build-type:         Simple
 Cabal-version:      >= 1.12
 Tested-with:        GHC == 7.6.*
 
+extra-source-files:
+  README.md
+  CHANGES.md
+
 Library
     Hs-source-dirs:   src
     Ghc-options:      -Wall -fno-warn-orphans
@@ -35,6 +39,9 @@ Test-suite timeout-tests
     Hs-source-dirs:   src, tests
     Default-language: Haskell2010
     Type:             exitcode-stdio-1.0
+
+    Other-modules:
+        Control.Timeout.Tests
 
     Build-depends:
         base
