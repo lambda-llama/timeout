@@ -1,7 +1,7 @@
 Name:               timeout
 Version:            0.0.0
-Synopsis:           Simple interface for IO time operations
-Description:        Simple interface for IO time operations
+Synopsis:           Generalized sleep and timeout functions
+Description:        Generalized sleep and timeout functions
 License:            MIT
 License-file:       LICENSE
 Copyright:          2014 Fedor Gogolev

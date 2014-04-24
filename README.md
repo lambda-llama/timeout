@@ -1,6 +1,8 @@
 timeout [![Build Status][travis-img]][travis]  [![Build Status][coveralls-img]][coveralls]
 =======
 
+Generalized sleep and timeout functions.
+
 [travis]: http://travis-ci.org/lambda-llama/timeout
 [travis-img]: http://img.shields.io/travis/lambda-llama/timeout.svg?style=flat
 

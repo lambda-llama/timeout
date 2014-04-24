@@ -5,21 +5,25 @@ module Control.Timeout.Tests (tests) where
 
 import Control.Exception (SomeException, try)
 import Data.Maybe (isJust, isNothing)
-import Data.Time.Clock (diffUTCTime, getCurrentTime)
+import Data.Time.Clock (NominalDiffTime, diffUTCTime, getCurrentTime)
 
 import Test.Tasty (TestTree, testGroup)
-import Test.Tasty.QuickCheck (Arbitrary(..), Property, Positive(..), suchThat, once, within, testProperty)
+import Test.Tasty.QuickCheck (Arbitrary(..), Property, Positive(..), NonNegative(..),
+                              suchThat, once, within, testProperty)
 import Test.QuickCheck.Monadic (monadicIO, run, assert)
 
 import Control.Timeout (timeout, sleep)
 
 -- | Interval that lesser than 1000 microseconds, that guarantied by
 -- 'Arbitrary' instance implementation.
-newtype SmallInterval = SmallInterval Int
+newtype SmallInterval = SmallInterval NominalDiffTime
     deriving (Show)
 
 instance Arbitrary SmallInterval where
     arbitrary = fmap (SmallInterval . getPositive) $ suchThat arbitrary (< 1000)
+
+instance Arbitrary NominalDiffTime where
+    arbitrary = fmap fromInteger arbitrary
 
 -- | Timeout works with exceptions mechanism, so we need to check is
 -- ordinary exceptions works.
@@ -42,6 +46,16 @@ testNotTimedOut = monadicIO $ do
     res <- run $ timeout 0.2 $ sleep 0.1
     assert $ isJust res
 
+-- | Test is timeout fires immediately for negative and zero value.
+testNegativeTimeout :: NonNegative NominalDiffTime -> Property
+testNegativeTimeout (NonNegative t') = let t = negate t' in monadicIO $ do
+    res <- run $ do
+        now <- getCurrentTime
+        timeout t $ sleep 0.1
+        new <- getCurrentTime
+        return $ diffUTCTime new now
+    assert $ res < 0.01
+
 -- | Test is forked timeout thread killed properly.
 testKillThreadKilled :: Property
 testKillThreadKilled = monadicIO $ do
@@ -59,7 +73,7 @@ testSleep (SmallInterval interval) = monadicIO $ do
         return $ diffUTCTime new now
     assert $ res > t
   where
-    t = fromIntegral interval / 1000
+    t = interval / 1000
 
 tests :: TestTree
 tests = testGroup "Control.Timeout.Tests"
