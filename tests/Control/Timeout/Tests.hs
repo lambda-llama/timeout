@@ -47,8 +47,8 @@ testNotTimedOut = monadicIO $ do
     assert $ isJust res
 
 -- | Test is timeout fires immediately for negative and zero value.
-testNegativeTimeout :: NonNegative NominalDiffTime -> Property
-testNegativeTimeout (NonNegative t') = let t = negate t' in monadicIO $ do
+testNotPoisitiveTimeout :: NonNegative NominalDiffTime -> Property
+testNotPoisitiveTimeout (NonNegative t') = let t = negate t' in monadicIO $ do
     res <- run $ do
         now <- getCurrentTime
         timeout t $ sleep 0.1
@@ -80,6 +80,7 @@ tests = testGroup "Control.Timeout.Tests"
     [ testProperty "timeout pass exceptions" $ once $ testOtherException
     , testProperty "timed out" $ once testTimedOut
     , testProperty "not timed out" $ once testNotTimedOut
+    , testProperty "not positive timeout" $ testNotPoisitiveTimeout
     , testProperty "kill thread killed" $ once testKillThreadKilled
     , testProperty "sleep" testSleep
     ]
