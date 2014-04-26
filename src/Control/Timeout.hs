@@ -20,11 +20,12 @@
 -- >     return ()
 --
 
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE Safe #-}
 
 module Control.Timeout
     ( NominalDiffTime
+    , Timeout(..)
     , timeout
     , sleep
     ) where
