@@ -21,7 +21,6 @@
 --
 
 {-# LANGUAGE DeriveDataTypeable #-}
-{-# LANGUAGE Safe #-}
 
 module Control.Timeout
     ( NominalDiffTime
