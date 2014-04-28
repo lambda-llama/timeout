@@ -87,9 +87,9 @@ timeToUsecs t = floor $ (* 1000000) $ toRational t
 timeout :: (MonadCatch m, MonadIO m) => NominalDiffTime -> m a -> m (Maybe a)
 timeout t f | t <= 0 = return Nothing
             | rtsSupportsBoundThreads = do
-    pid <- liftIO myThreadId
     timer <- liftIO getSystemTimerManager
     ex@(Timeout key) <- liftIO $ mdo
+        pid <- liftIO myThreadId
         ex <- return . Timeout =<< (liftIO $ registerTimeout timer (timeToUsecs t) (throwTo pid ex))
         return ex
     handleJust (\e -> if e == ex then Just () else Nothing)
