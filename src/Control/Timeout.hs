@@ -93,10 +93,8 @@ timeout t f | t <= 0 = return Nothing
         ex <- return . Timeout =<< (liftIO $ registerTimeout timer (timeToUsecs t) (throwTo pid ex))
         return ex
     handleJust (\e -> if e == ex then Just () else Nothing)
-               (\_ -> return Nothing) $ do
-        r <- f
-        liftIO $ unregisterTimeout timer key
-        return $ Just r
+               (\_ -> return Nothing)
+               (f >>= \r -> (liftIO $ unregisterTimeout timer key) >> (return $ Just r))
             | otherwise = do
     pid <- liftIO myThreadId
     ex  <- liftIO newUnique >>= return . Timeout . unsafeCoerce
