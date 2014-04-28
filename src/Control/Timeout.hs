@@ -20,6 +20,7 @@
 -- >     return ()
 --
 
+{-# LANGUAGE Trustworthy #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 
 module Control.Timeout
