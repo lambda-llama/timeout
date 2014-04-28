@@ -1,9 +1,10 @@
 -- |
--- Module     : Control.Timeout
--- Copyright  : 2014 Fedor Gogolev, 2013 Selectel
--- License    : MIT
--- Maintainer : Fedor Gogolev <knsd@knsd.net>
--- Stability  : unstable
+-- Module      : Control.Timeout
+-- Copyright   : 2014 Fedor Gogolev, 2013 Selectel
+-- License     : MIT
+-- Maintainer  : Fedor Gogolev <knsd@knsd.net>
+-- Stability   : unstable
+-- Portability : non-portable
 --
 -- This module provides generalized 'sleep' and 'timeout' functions.
 --
