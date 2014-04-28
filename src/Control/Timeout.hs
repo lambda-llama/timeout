@@ -22,6 +22,7 @@
 --
 
 {-# LANGUAGE Trustworthy #-}
+{-# LANGUAGE RecursiveDo #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 
 module Control.Timeout
@@ -32,16 +33,19 @@ module Control.Timeout
     ) where
 
 import Control.Exception (Exception)
-import Control.Concurrent (myThreadId, forkIO, killThread, threadDelay, throwTo)
+import Control.Concurrent (myThreadId, forkIO, killThread, threadDelay, throwTo,
+                           rtsSupportsBoundThreads)
 import Data.Typeable (Typeable)
 import Data.Time.Clock (NominalDiffTime)
-import Data.Unique (Unique, newUnique)
+import Data.Unique (newUnique)
+import GHC.Event (TimeoutKey, getSystemTimerManager, registerTimeout, unregisterTimeout)
+import Unsafe.Coerce (unsafeCoerce)
 
 import Control.Monad.Catch (MonadCatch(..), bracket, handleJust)
 import Control.Monad.Trans (MonadIO, liftIO)
 
 -- | Exception used for timeout handling
-newtype Timeout = Timeout Unique
+newtype Timeout = Timeout TimeoutKey
     deriving (Eq, Typeable)
 
 instance Show Timeout where
@@ -82,9 +86,20 @@ timeToUsecs t = floor $ (* 1000000) $ toRational t
 -- I\/O or file I\/O using this combinator.
 timeout :: (MonadCatch m, MonadIO m) => NominalDiffTime -> m a -> m (Maybe a)
 timeout t f | t <= 0 = return Nothing
+            | rtsSupportsBoundThreads = do
+    pid <- liftIO myThreadId
+    timer <- liftIO getSystemTimerManager
+    ex@(Timeout key) <- liftIO $ mdo
+        ex <- return . Timeout =<< (liftIO $ registerTimeout timer (timeToUsecs t) (throwTo pid ex))
+        return ex
+    handleJust (\e -> if e == ex then Just () else Nothing)
+               (\_ -> return Nothing) $ do
+        r <- f
+        liftIO $ unregisterTimeout timer key
+        return $ Just r
             | otherwise = do
     pid <- liftIO myThreadId
-    ex  <- liftIO newUnique >>= return . Timeout
+    ex  <- liftIO newUnique >>= return . Timeout . unsafeCoerce
     handleJust (\e -> if e == ex then Just () else Nothing)
                (\_ -> return Nothing)
                (bracket (liftIO $ forkIO (sleep t >> throwTo pid ex))
