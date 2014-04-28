@@ -49,6 +49,10 @@ instance Show Timeout where
 
 instance Exception Timeout
 
+timeToUsecs :: NominalDiffTime -> Int
+timeToUsecs t = floor $ (* 1000000) $ toRational t
+{-# INLINEABLE timeToUsecs #-}
+
 -- | Wrap an 'MonadIO' computation to time out and return @Nothing@ in case no result
 -- is available within @n@ seconds. In case a result
 -- is available before the timeout expires, @Just a@ is returned. A negative
@@ -91,4 +95,4 @@ timeout t f | t <= 0 = return Nothing
 --
 -- > sleep 5  -- Will sleep for 5 seconds
 sleep :: (MonadIO m) => NominalDiffTime -> m ()
-sleep = liftIO . threadDelay . floor . (* 1000000) . toRational
+sleep = liftIO . threadDelay . timeToUsecs
