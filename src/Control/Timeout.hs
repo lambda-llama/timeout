@@ -28,6 +28,7 @@
 module Control.Timeout
     ( NominalDiffTime
     , Timeout(..)
+    , withTimeout
     , timeout
     , sleep
     ) where
@@ -85,7 +86,10 @@ timeToUsecs t = floor $ (* 1000000) $ toRational t
 -- perform asynchronous I\/O, so it is possible to interrupt standard socket
 -- I\/O or file I\/O using this combinator.
 timeout :: (MonadCatch m, MonadIO m) => NominalDiffTime -> m a -> m (Maybe a)
-timeout t f | t <= 0 = return Nothing
+timeout = (. const) . withTimeout
+
+withTimeout :: (MonadCatch m, MonadIO m) => NominalDiffTime -> (Timeout -> m a) -> m (Maybe a)
+withTimeout t f | t <= 0 = return Nothing
             | rtsSupportsBoundThreads = do
     timer <- liftIO getSystemTimerManager
     ex@(Timeout key) <- liftIO $ mdo
@@ -94,7 +98,7 @@ timeout t f | t <= 0 = return Nothing
         return ex
     handleJust (\e -> if e == ex then Just () else Nothing)
                (\_ -> return Nothing)
-               (f >>= \r -> (liftIO $ unregisterTimeout timer key) >> (return $ Just r))
+               (f ex >>= \r -> (liftIO $ unregisterTimeout timer key) >> (return $ Just r))
             | otherwise = do
     pid <- liftIO myThreadId
     ex  <- liftIO newUnique >>= return . Timeout . unsafeCoerce
@@ -102,7 +106,7 @@ timeout t f | t <= 0 = return Nothing
                (\_ -> return Nothing)
                (bracket (liftIO $ forkIO (sleep t >> throwTo pid ex))
                         (liftIO . killThread)
-                        (\_ -> f >>= return . Just))
+                        (\_ -> f ex >>= return . Just))
 
 -- | Sleep for 'NominalDiffTime', example:
 --
