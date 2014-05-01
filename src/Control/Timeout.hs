@@ -42,7 +42,7 @@ import Unsafe.Coerce (unsafeCoerce)
 import Control.Monad.Catch (MonadCatch(..), bracket, handleJust)
 import Control.Monad.Trans (MonadIO, liftIO)
 
-import Control.Timeout.EventManager.Types
+import Control.Timeout.Types
 import Control.Timeout.Utils
 
 -- | Wrap an 'MonadIO' computation to time out and return @Nothing@ in case no result

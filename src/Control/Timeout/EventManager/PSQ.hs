@@ -89,8 +89,9 @@ module Control.Timeout.EventManager.PSQ
     ) where
 
 import Prelude hiding (lookup, null)
-import Control.Timeout.EventManager.Types (Timeout)
 import Data.Time.Clock (UTCTime)
+
+import Control.Timeout.Types (Timeout)
 
 -- | @E k p@ binds the key @k@ with the priority @p@.
 data Elem a = E

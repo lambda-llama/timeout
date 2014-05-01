@@ -1,6 +1,6 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 
-module Control.Timeout.EventManager.Types
+module Control.Timeout.Types
     ( Timeout(..)
     , TimeoutKey
     ) where

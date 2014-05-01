@@ -13,8 +13,8 @@ import System.IO.Unsafe (unsafePerformIO)
 import Control.Monad.Trans (liftIO)
 import Control.Monad.Trans.State.Strict (evalStateT, get, put)
 
-import Control.Timeout.EventManager.Types (Timeout)
 import Control.Timeout.EventManager.PSQ (PSQ, Elem(..))
+import Control.Timeout.Types (Timeout)
 import Control.Timeout.Utils (sleep)
 import qualified Control.Timeout.EventManager.PSQ as PSQ
 

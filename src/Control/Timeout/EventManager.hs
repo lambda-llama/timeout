@@ -8,7 +8,7 @@ module Control.Timeout.EventManager
 import qualified GHC.Event as Event
 import Control.Concurrent (rtsSupportsBoundThreads)
 
-import Control.Timeout.EventManager.Types (Timeout)
+import Control.Timeout.Types (Timeout)
 
 getTimerManager :: IO EventManager
 getTimerManager
