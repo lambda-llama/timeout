@@ -23,7 +23,6 @@
 
 {-# LANGUAGE Trustworthy #-}
 {-# LANGUAGE RecursiveDo #-}
-{-# LANGUAGE DeriveDataTypeable #-}
 
 module Control.Timeout
     ( NominalDiffTime
@@ -33,30 +32,18 @@ module Control.Timeout
     , sleep
     ) where
 
-import Control.Exception (Exception)
-import Control.Concurrent (myThreadId, forkIO, killThread, threadDelay, throwTo,
+import Control.Concurrent (myThreadId, forkIO, killThread, throwTo,
                            rtsSupportsBoundThreads)
-import Data.Typeable (Typeable)
 import Data.Time.Clock (NominalDiffTime)
 import Data.Unique (newUnique)
-import GHC.Event (TimeoutKey, getSystemTimerManager, registerTimeout, unregisterTimeout)
+import GHC.Event (getSystemTimerManager, registerTimeout, unregisterTimeout)
 import Unsafe.Coerce (unsafeCoerce)
 
 import Control.Monad.Catch (MonadCatch(..), bracket, handleJust)
 import Control.Monad.Trans (MonadIO, liftIO)
 
--- | Exception used for timeout handling
-newtype Timeout = Timeout TimeoutKey
-    deriving (Eq, Typeable)
-
-instance Show Timeout where
-    show _ = "<<timeout>>"
-
-instance Exception Timeout
-
-timeToUsecs :: NominalDiffTime -> Int
-timeToUsecs t = floor $ (* 1000000) $ toRational t
-{-# INLINEABLE timeToUsecs #-}
+import Control.Timeout.EventManager.Types
+import Control.Timeout.Utils
 
 -- | Wrap an 'MonadIO' computation to time out and return @Nothing@ in case no result
 -- is available within @n@ seconds. In case a result
@@ -94,11 +81,11 @@ withTimeout t f | t <= 0 = return Nothing
     timer <- liftIO getSystemTimerManager
     ex@(Timeout key) <- liftIO $ mdo
         pid <- liftIO myThreadId
-        ex <- return . Timeout =<< (liftIO $ registerTimeout timer (timeToUsecs t) (throwTo pid ex))
+        ex <- fmap (Timeout . unsafeCoerce) (liftIO $ registerTimeout timer (timeToUsecs t) (throwTo pid ex))
         return ex
     handleJust (\e -> if e == ex then Just () else Nothing)
                (\_ -> return Nothing)
-               (f ex >>= \r -> (liftIO $ unregisterTimeout timer key) >> (return $ Just r))
+               (f ex >>= \r -> (liftIO $ unregisterTimeout timer (unsafeCoerce key)) >> (return $ Just r))
             | otherwise = do
     pid <- liftIO myThreadId
     ex  <- liftIO newUnique >>= return . Timeout . unsafeCoerce
@@ -107,9 +94,3 @@ withTimeout t f | t <= 0 = return Nothing
                (bracket (liftIO $ forkIO (sleep t >> throwTo pid ex))
                         (liftIO . killThread)
                         (\_ -> f ex >>= return . Just))
-
--- | Sleep for 'NominalDiffTime', example:
---
--- > sleep 5  -- Will sleep for 5 seconds
-sleep :: (MonadIO m) => NominalDiffTime -> m ()
-sleep = liftIO . threadDelay . timeToUsecs
