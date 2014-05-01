@@ -29,9 +29,8 @@ instance Show Event where
 instance Exception Event
 
 type TimeoutQueue = PSQ (IO ())
-type EventManager = TimeoutQueue
 
-tick :: EventManager -> IO EventManager
+tick :: TimeoutQueue -> IO TimeoutQueue
 tick queue = handle eventHandler $ do
     let mbNext = PSQ.findMin queue
     case mbNext of
