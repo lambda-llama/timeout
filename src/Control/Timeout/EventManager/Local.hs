@@ -8,13 +8,14 @@ import Control.Concurrent (ThreadId, forkIO, throwTo, rtsSupportsBoundThreads)
 import Control.Monad (void)
 import Data.Time.Clock (NominalDiffTime, addUTCTime, diffUTCTime, getCurrentTime)
 import Data.Typeable (Typeable)
+import Data.Unique (newUnique)
 import System.IO.Unsafe (unsafePerformIO)
 
 import Control.Monad.Trans (liftIO)
 import Control.Monad.Trans.State.Strict (evalStateT, get, put)
 
 import Control.Timeout.EventManager.PSQ (PSQ, Elem(..))
-import Control.Timeout.Types (Timeout)
+import Control.Timeout.Types (Timeout(..))
 import Control.Timeout.Utils (sleep)
 import qualified Control.Timeout.EventManager.PSQ as PSQ
 
@@ -62,7 +63,10 @@ managerThread
 {-# NOINLINE managerThread #-}
 
 registerTimeout :: NominalDiffTime -> IO () -> IO Timeout
-registerTimeout = undefined
+registerTimeout time f = do
+    timeout <- fmap Timeout newUnique
+    throwTo managerThread $ Register timeout time f
+    return timeout
 
 unregisterTimeout :: Timeout -> IO ()
 unregisterTimeout t = throwTo managerThread $ Unregister t
