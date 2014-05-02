@@ -1,7 +1,10 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 
-module Control.Timeout.EventManager.Local () where
+module Control.Timeout.EventManager.Local
+    ( registerTimeout
+    , unregisterTimeout
+    ) where
 
 import Control.Exception (Exception, handle)
 import Control.Concurrent (ThreadId, forkIO, throwTo, rtsSupportsBoundThreads)
@@ -10,9 +13,6 @@ import Data.Time.Clock (NominalDiffTime, addUTCTime, diffUTCTime, getCurrentTime
 import Data.Typeable (Typeable)
 import Data.Unique (newUnique)
 import System.IO.Unsafe (unsafePerformIO)
-
-import Control.Monad.Trans (liftIO)
-import Control.Monad.Trans.State.Strict (evalStateT, get, put)
 
 import Control.Timeout.EventManager.PSQ (PSQ, Elem(..))
 import Control.Timeout.Types (Timeout(..))
@@ -48,12 +48,9 @@ tick queue = handle eventHandler $ do
     eventHandler (Unregister timeout) = return $ PSQ.delete timeout queue
 
 loop :: IO ()
-loop = void $ evalStateT go PSQ.empty
+loop = void $ go PSQ.empty
   where
-    go = do
-        state <- get
-        new <- liftIO $ tick state
-        put new >> go
+    go state = tick state >>= go
 
 managerThread :: ThreadId
 managerThread

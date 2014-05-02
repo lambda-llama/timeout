@@ -28,14 +28,13 @@ Library
     Build-depends:
         base < 5
       , time
-      , transformers
       , mtl
       , exceptions
 
     Exposed-modules:
         Control.Timeout
     Other-modules:
-        Control.Timeout.EventManager.Local
+        Control.Timeout.EventManager
 
 Test-suite timeout-tests
     Main-is:          Tests.hs
