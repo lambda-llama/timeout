@@ -36,7 +36,6 @@ import Control.Concurrent (myThreadId, forkIO, killThread, throwTo,
                            rtsSupportsBoundThreads)
 import Data.Time.Clock (NominalDiffTime)
 import Data.Unique (newUnique)
-import GHC.Event (getSystemTimerManager, registerTimeout, unregisterTimeout)
 import Unsafe.Coerce (unsafeCoerce)
 
 import Control.Monad.Catch (MonadCatch(..), bracket, handleJust)
@@ -44,6 +43,7 @@ import Control.Monad.Trans (MonadIO, liftIO)
 
 import Control.Timeout.Types
 import Control.Timeout.Utils
+import Control.Timeout.EventManager (registerTimeout, unregisterTimeout)
 
 -- | Wrap an 'MonadIO' computation to time out and return @Nothing@ in case no result
 -- is available within @n@ seconds. In case a result
@@ -77,20 +77,11 @@ timeout = (. const) . withTimeout
 
 withTimeout :: (MonadCatch m, MonadIO m) => NominalDiffTime -> (Timeout -> m a) -> m (Maybe a)
 withTimeout t f | t <= 0 = return Nothing
-            | rtsSupportsBoundThreads = do
-    timer <- liftIO getSystemTimerManager
-    ex@(Timeout key) <- liftIO $ mdo
-        pid <- liftIO myThreadId
-        ex <- fmap (Timeout . unsafeCoerce) (liftIO $ registerTimeout timer (timeToUsecs t) (throwTo pid ex))
+                | otherwise = do
+    ex <- liftIO $ mdo
+        pid <- myThreadId
+        ex <- registerTimeout t (throwTo pid ex)
         return ex
     handleJust (\e -> if e == ex then Just () else Nothing)
                (\_ -> return Nothing)
-               (f ex >>= \r -> (liftIO $ unregisterTimeout timer (unsafeCoerce key)) >> (return $ Just r))
-            | otherwise = do
-    pid <- liftIO myThreadId
-    ex  <- liftIO newUnique >>= return . Timeout . unsafeCoerce
-    handleJust (\e -> if e == ex then Just () else Nothing)
-               (\_ -> return Nothing)
-               (bracket (liftIO $ forkIO (sleep t >> throwTo pid ex))
-                        (liftIO . killThread)
-                        (\_ -> f ex >>= return . Just))
+               (f ex >>= \r -> (liftIO $ unregisterTimeout ex) >> (return $ Just r))
