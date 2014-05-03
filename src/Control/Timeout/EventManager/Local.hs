@@ -1,5 +1,4 @@
 {-# LANGUAGE NamedFieldPuns #-}
-{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 
 module Control.Timeout.EventManager.Local
@@ -7,7 +6,7 @@ module Control.Timeout.EventManager.Local
     , unregisterTimeout
     ) where
 
-import Control.Exception (Exception, SomeException, handle)
+import Control.Exception (Exception, SomeException, handle, mask)
 import Control.Concurrent (ThreadId, forkIO, throwTo, rtsSupportsBoundThreads)
 import Control.Monad (void)
 import Data.Time.Clock (NominalDiffTime, addUTCTime, diffUTCTime, getCurrentTime)
@@ -31,8 +30,8 @@ instance Exception Event
 
 type TimeoutQueue = PSQ (IO ())
 
-tick :: TimeoutQueue -> IO TimeoutQueue
-tick queue = handle eventHandler $ do
+tick :: (IO TimeoutQueue -> IO TimeoutQueue) -> TimeoutQueue -> IO TimeoutQueue
+tick restore queue = handle eventHandler $ restore $ do
     let mbNext = PSQ.findMin queue
     case mbNext of
         Just (E { prio, value }) -> do
@@ -52,9 +51,9 @@ tick queue = handle eventHandler $ do
     eventHandler (Unregister timeout) = return $ PSQ.delete timeout queue
 
 loop :: IO ()
-loop = void $ go PSQ.empty
+loop = void $ mask $ \restore -> go restore PSQ.empty
   where
-    go state = tick state >>= go
+    go restore state = tick restore state >>= go restore
 
 managerThread :: ThreadId
 managerThread
