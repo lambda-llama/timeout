@@ -1,4 +1,5 @@
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 
 module Control.Timeout.EventManager.Local
@@ -6,7 +7,7 @@ module Control.Timeout.EventManager.Local
     , unregisterTimeout
     ) where
 
-import Control.Exception (Exception, handle)
+import Control.Exception (Exception, SomeException, handle)
 import Control.Concurrent (ThreadId, forkIO, throwTo, rtsSupportsBoundThreads)
 import Control.Monad (void)
 import Data.Time.Clock (NominalDiffTime, addUTCTime, diffUTCTime, getCurrentTime)
@@ -37,10 +38,13 @@ tick queue = handle eventHandler $ do
         Just (E { prio, value }) -> do
             now <- getCurrentTime
             let diff = diffUTCTime prio now
-            sleep diff >> value
+            sleep diff >> eatException value
             return $ PSQ.deleteMin queue
         Nothing -> sleep 1 >> return queue
   where
+    eatException f = handle handleSomeException f
+    handleSomeException :: SomeException -> IO ()
+    handleSomeException _ = return ()
     eventHandler (Register timeout time f) = do
         now <- getCurrentTime
         let time' = addUTCTime time now
