@@ -6,12 +6,14 @@ module Control.Timeout.EventManager.Local
     , unregisterTimeout
     ) where
 
+import Control.Applicative ((<*))
 import Control.Exception (Exception, SomeException, handle, mask)
 import Control.Concurrent (ThreadId, forkIO, throwTo, rtsSupportsBoundThreads)
 import Control.Monad (void)
 import Data.Time.Clock (NominalDiffTime, addUTCTime, diffUTCTime, getCurrentTime)
 import Data.Typeable (Typeable)
 import Data.Unique (newUnique)
+import GHC.Conc (yield)
 import System.IO.Unsafe (unsafePerformIO)
 
 import Control.Timeout.EventManager.PSQ (PSQ, Elem(..))
@@ -48,7 +50,8 @@ tick restore queue = handle eventHandler $ restore $ do
         now <- getCurrentTime
         let time' = addUTCTime time now
         return $ PSQ.insert timeout time' f queue
-    eventHandler (Unregister timeout) = return $ PSQ.delete timeout queue
+    eventHandler (Unregister timeout) = do
+        return $ PSQ.delete timeout queue
 
 loop :: IO ()
 loop = void $ mask $ \restore -> go restore PSQ.empty
@@ -58,7 +61,7 @@ loop = void $ mask $ \restore -> go restore PSQ.empty
 managerThread :: ThreadId
 managerThread
   | rtsSupportsBoundThreads = error "manager thread not running"
-  | otherwise = unsafePerformIO $ forkIO loop
+  | otherwise = unsafePerformIO $ forkIO loop <* yield
 {-# NOINLINE managerThread #-}
 
 registerTimeout :: NominalDiffTime -> IO () -> IO Timeout
