@@ -17,7 +17,11 @@ import qualified Control.Timeout.TimerManager.Local as Local
 registerTimeout :: NominalDiffTime -> IO () -> IO Timeout
 registerTimeout t f
   | rtsSupportsBoundThreads = do
+#if __GLASGOW_HASKELL__ < 707
+        Just timer <- Event.getSystemEventManager
+#else
         timer <- Event.getSystemTimerManager
+#endif
         fmap (Timeout . unsafeCoerce) $ Event.registerTimeout timer (timeToUsecs t) f
   | otherwise = Local.registerTimeout t f
 
