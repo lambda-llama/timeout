@@ -32,13 +32,10 @@ module Control.Timeout
     , sleep
     ) where
 
-import Control.Concurrent (myThreadId, forkIO, killThread, throwTo,
-                           rtsSupportsBoundThreads)
+import Control.Concurrent (myThreadId, throwTo)
 import Data.Time.Clock (NominalDiffTime)
-import Data.Unique (newUnique)
-import Unsafe.Coerce (unsafeCoerce)
 
-import Control.Monad.Catch (MonadCatch(..), bracket, handleJust)
+import Control.Monad.Catch (MonadCatch(..), handleJust)
 import Control.Monad.Trans (MonadIO, liftIO)
 
 import Control.Timeout.Types
