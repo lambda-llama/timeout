@@ -1,4 +1,4 @@
-module Control.Timeout.EventManager
+module Control.Timeout.TimerManager
     ( registerTimeout
     , unregisterTimeout
     ) where
@@ -10,7 +10,7 @@ import Unsafe.Coerce (unsafeCoerce)
 
 import Control.Timeout.Types (Timeout(..))
 import Control.Timeout.Utils (timeToUsecs)
-import qualified Control.Timeout.EventManager.Local as Local
+import qualified Control.Timeout.TimerManager.Local as Local
 
 registerTimeout :: NominalDiffTime -> IO () -> IO Timeout
 registerTimeout t f

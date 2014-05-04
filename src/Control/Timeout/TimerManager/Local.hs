@@ -1,7 +1,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 
-module Control.Timeout.EventManager.Local
+module Control.Timeout.TimerManager.Local
     ( registerTimeout
     , unregisterTimeout
     ) where
@@ -16,10 +16,10 @@ import Data.Unique (newUnique)
 import GHC.Conc (yield)
 import System.IO.Unsafe (unsafePerformIO)
 
-import Control.Timeout.EventManager.PSQ (PSQ, Elem(..))
+import Control.Timeout.TimerManager.PSQ (PSQ, Elem(..))
 import Control.Timeout.Types (Timeout(..))
 import Control.Timeout.Utils (sleep)
-import qualified Control.Timeout.EventManager.PSQ as PSQ
+import qualified Control.Timeout.TimerManager.PSQ as PSQ
 
 data Event = Register Timeout NominalDiffTime (IO ())
            | Unregister Timeout

@@ -40,7 +40,7 @@ import Control.Monad.Trans (MonadIO, liftIO)
 
 import Control.Timeout.Types
 import Control.Timeout.Utils
-import Control.Timeout.EventManager (registerTimeout, unregisterTimeout)
+import Control.Timeout.TimerManager (registerTimeout, unregisterTimeout)
 
 -- | Wrap an 'MonadIO' computation to time out and return @Nothing@ in case no result
 -- is available within @n@ seconds. In case a result

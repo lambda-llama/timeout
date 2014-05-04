@@ -34,9 +34,9 @@ Library
     Exposed-modules:
         Control.Timeout
     Other-modules:
-        Control.Timeout.EventManager
-        Control.Timeout.EventManager.Local
-        Control.Timeout.EventManager.PSQ
+        Control.Timeout.TimerManager
+        Control.Timeout.TimerManager.Local
+        Control.Timeout.TimerManager.PSQ
         Control.Timeout.Types
         Control.Timeout.Utils
 

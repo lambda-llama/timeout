@@ -49,7 +49,7 @@
 -- Queues/, ICFP 2001, pp. 110-121
 --
 -- <http://citeseer.ist.psu.edu/hinze01simple.html>
-module Control.Timeout.EventManager.PSQ
+module Control.Timeout.TimerManager.PSQ
     (
     -- * Binding Type
     Elem(..)
