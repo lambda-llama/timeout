@@ -1,5 +1,6 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE ForeignFunctionInterface #-}
 
 module Control.Timeout.TimerManager.Local
     ( registerTimeout
@@ -8,20 +9,19 @@ module Control.Timeout.TimerManager.Local
 
 import Control.Applicative ((<*))
 import Control.Exception (Exception, SomeException, handle, mask)
-import Control.Concurrent (ThreadId, forkIO, throwTo, rtsSupportsBoundThreads)
+import Control.Concurrent (ThreadId, forkIO, throwTo, threadDelay, rtsSupportsBoundThreads)
 import Control.Monad (void)
-import Data.Time.Clock (NominalDiffTime, addUTCTime, diffUTCTime, getCurrentTime)
 import Data.Typeable (Typeable)
 import Data.Unique (newUnique)
+import Data.Word (Word64)
 import GHC.Conc (yield)
 import System.IO.Unsafe (unsafePerformIO)
 
 import Control.Timeout.TimerManager.PSQ (PSQ, Elem(..))
 import Control.Timeout.Types (Timeout(..))
-import Control.Timeout.Utils (sleep)
 import qualified Control.Timeout.TimerManager.PSQ as PSQ
 
-data Event = Register Timeout NominalDiffTime (IO ())
+data Event = Register Timeout Int (IO ())
            | Unregister Timeout
     deriving (Typeable)
 
@@ -37,18 +37,18 @@ tick restore queue = handle eventHandler $ restore $ do
     let mbNext = PSQ.findMin queue
     case mbNext of
         Just (E { prio, value }) -> do
-            now <- getCurrentTime
-            let diff = diffUTCTime prio now
-            sleep diff >> eatException value
+            now <- getMonotonicTime
+            let diff = prio - now
+            threadDelay diff >> eatException value
             return $ PSQ.deleteMin queue
-        Nothing -> sleep 1 >> return queue
+        Nothing -> threadDelay 1000000 >> return queue
   where
     eatException f = handle handleSomeException f
     handleSomeException :: SomeException -> IO ()
     handleSomeException _ = return ()
     eventHandler (Register timeout time f) = do
-        now <- getCurrentTime
-        let time' = addUTCTime time now
+        now <- getMonotonicTime
+        let time' = time + now
         return $ PSQ.insert timeout time' f queue
     eventHandler (Unregister timeout) = do
         return $ PSQ.delete timeout queue
@@ -64,7 +64,7 @@ managerThread
   | otherwise = unsafePerformIO $ forkIO loop <* yield
 {-# NOINLINE managerThread #-}
 
-registerTimeout :: NominalDiffTime -> IO () -> IO Timeout
+registerTimeout :: Int -> IO () -> IO Timeout
 registerTimeout time f = do
     timeout <- fmap Timeout newUnique
     throwTo managerThread $ Register timeout time f
@@ -72,3 +72,9 @@ registerTimeout time f = do
 
 unregisterTimeout :: Timeout -> IO ()
 unregisterTimeout t = throwTo managerThread $ Unregister t
+
+foreign import ccall unsafe "getMonotonicNSec"
+    getMonotonicNSec :: IO Word64
+
+getMonotonicTime :: IO Int
+getMonotonicTime = fmap (fromIntegral . (`div` 1000)) $ getMonotonicNSec

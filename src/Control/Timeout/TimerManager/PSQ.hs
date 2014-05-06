@@ -89,7 +89,6 @@ module Control.Timeout.TimerManager.PSQ
     ) where
 
 import Prelude hiding (lookup, null)
-import Data.Time.Clock (UTCTime)
 
 import Control.Timeout.Types (Timeout)
 
@@ -103,7 +102,7 @@ data Elem a = E
 ------------------------------------------------------------------------
 -- | A mapping from keys @k@ to priorites @p@.
 
-type Prio = UTCTime
+type Prio = Int
 type Key = Timeout
 
 data PSQ a = Void

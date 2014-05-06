@@ -23,7 +23,7 @@ registerTimeout t f
         timer <- Event.getSystemTimerManager
 #endif
         fmap (Timeout . unsafeCoerce) $ Event.registerTimeout timer (timeToUsecs t) f
-  | otherwise = Local.registerTimeout t f
+  | otherwise = Local.registerTimeout (timeToUsecs t) f
 
 unregisterTimeout :: Timeout -> IO ()
 unregisterTimeout t@(Timeout key)
