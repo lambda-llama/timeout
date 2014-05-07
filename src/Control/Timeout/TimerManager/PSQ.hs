@@ -94,7 +94,7 @@ import Control.Timeout.Types (Timeout)
 
 -- | @E k p@ binds the key @k@ with the priority @p@.
 data Elem a = E
-    { key   :: !Key
+    { key   :: {-# UNPACK #-} !Key
     , prio  :: {-# UNPACK #-} !Prio
     , value :: a
     } deriving (Eq)
@@ -108,7 +108,7 @@ type Key = Timeout
 data PSQ a = Void
            | Winner {-# UNPACK #-} !(Elem a)
                     !(LTree a)
-                    !Key  -- max key
+                    {-# UNPACK #-} !Key  -- max key
            deriving (Eq)
 
 -- | /O(1)/ The number of elements in a queue.
@@ -289,12 +289,12 @@ data LTree a = Start
              | LLoser {-# UNPACK #-} !Size
                       {-# UNPACK #-} !(Elem a)
                       !(LTree a)
-                      !Key  -- split key
+                      {-# UNPACK #-} !Key  -- split key
                       !(LTree a)
              | RLoser {-# UNPACK #-} !Size
                       {-# UNPACK #-} !(Elem a)
                       !(LTree a)
-                      !Key  -- split key
+                      {-# UNPACK #-} !Key  -- split key
                       !(LTree a)
              deriving (Eq)
 

@@ -38,6 +38,7 @@ Library
         Control.Timeout.TimerManager.Local
         Control.Timeout.TimerManager.PSQ
         Control.Timeout.Types
+        Control.Timeout.Unique
         Control.Timeout.Utils
 
 Test-suite timeout-tests

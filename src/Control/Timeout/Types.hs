@@ -7,7 +7,8 @@ module Control.Timeout.Types
 
 import Control.Exception (Exception)
 import Data.Typeable (Typeable)
-import Data.Unique (Unique)
+
+import Control.Timeout.Unique (Unique)
 
 type TimeoutKey = Unique
 

@@ -12,13 +12,13 @@ import Control.Exception (Exception, SomeException, handle, mask)
 import Control.Concurrent (ThreadId, forkIO, throwTo, threadDelay, rtsSupportsBoundThreads)
 import Control.Monad (void)
 import Data.Typeable (Typeable)
-import Data.Unique (newUnique)
 import Data.Word (Word64)
 import GHC.Conc (yield)
 import System.IO.Unsafe (unsafePerformIO)
 
 import Control.Timeout.TimerManager.PSQ (PSQ, Elem(..))
 import Control.Timeout.Types (Timeout(..))
+import Control.Timeout.Unique (newUnique)
 import qualified Control.Timeout.TimerManager.PSQ as PSQ
 
 data Event = Register Timeout Int (IO ())
