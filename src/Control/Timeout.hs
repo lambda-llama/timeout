@@ -32,7 +32,7 @@ module Control.Timeout
     , sleep
     ) where
 
-import Control.Concurrent (myThreadId, throwTo)
+import Control.Concurrent (myThreadId, throwTo, threadDelay)
 import Data.Time.Clock (NominalDiffTime)
 
 import Control.Monad.Catch (MonadCatch(..), handleJust)
@@ -82,3 +82,9 @@ withTimeout t f | t <= 0 = return Nothing
     handleJust (\e -> if e == ex then Just () else Nothing)
                (\_ -> return Nothing)
                (f ex >>= \r -> (liftIO $ unregisterTimeout ex) >> (return $ Just r))
+
+-- | Sleep for 'NominalDiffTime', example:
+--
+-- > sleep 5  -- Will sleep for 5 seconds
+sleep :: (MonadIO m) => NominalDiffTime -> m ()
+sleep = liftIO . threadDelay . timeToUsecs
