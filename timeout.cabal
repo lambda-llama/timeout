@@ -61,6 +61,26 @@ Test-suite timeout-tests
       , tasty-quickcheck
       , QuickCheck       >= 2.7
 
+Test-suite timeout-tests-threaded
+    Main-is:          Tests.hs
+    Hs-source-dirs:   src, tests
+    Default-language: Haskell2010
+    Type:             exitcode-stdio-1.0
+    Ghc-options:      -Wall -threaded
+
+    Other-modules:
+        Control.Timeout.Tests
+
+    Build-depends:
+        base
+      , time
+      , mtl
+      , exceptions
+
+      , tasty
+      , tasty-quickcheck
+      , QuickCheck       >= 2.7
+
 Source-repository head
     Type:     git
     Location: https://github.com/lambda-llama/timeout
