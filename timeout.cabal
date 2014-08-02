@@ -29,7 +29,7 @@ Library
         base < 5
       , time
       , mtl
-      , exceptions
+      , exceptions >= 0.6
 
     Exposed-modules:
         Control.Timeout
@@ -47,7 +47,7 @@ Test-suite timeout-tests
         base
       , time
       , mtl
-      , exceptions
+      , exceptions >= 0.6
 
       , tasty
       , tasty-quickcheck

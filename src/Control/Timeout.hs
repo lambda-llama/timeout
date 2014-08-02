@@ -35,7 +35,7 @@ import Data.Typeable (Typeable)
 import Data.Time.Clock (NominalDiffTime)
 import Data.Unique (Unique, newUnique)
 
-import Control.Monad.Catch (MonadCatch(..), bracket, handleJust)
+import Control.Monad.Catch (MonadMask(..), bracket, handleJust)
 import Control.Monad.Trans (MonadIO, liftIO)
 
 -- | Exception used for timeout handling
@@ -74,7 +74,7 @@ instance Exception Timeout
 -- because the runtime system uses scheduling mechanisms like @select(2)@ to
 -- perform asynchronous I\/O, so it is possible to interrupt standard socket
 -- I\/O or file I\/O using this combinator.
-timeout :: (MonadCatch m, MonadIO m) => NominalDiffTime -> m a -> m (Maybe a)
+timeout :: (MonadMask m, MonadIO m) => NominalDiffTime -> m a -> m (Maybe a)
 timeout t f | t <= 0 = return Nothing
             | otherwise = do
     pid <- liftIO myThreadId
