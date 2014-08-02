@@ -35,7 +35,7 @@ module Control.Timeout
 import Control.Concurrent (myThreadId, throwTo, threadDelay)
 import Data.Time.Clock (NominalDiffTime)
 
-import Control.Monad.Catch (MonadCatch(..), handleJust)
+import Control.Monad.Catch (MonadMask(..), handleJust)
 import Control.Monad.Trans (MonadIO, liftIO)
 
 import Control.Timeout.Types
@@ -69,10 +69,10 @@ import Control.Timeout.TimerManager (registerTimeout, unregisterTimeout)
 -- because the runtime system uses scheduling mechanisms like @select(2)@ to
 -- perform asynchronous I\/O, so it is possible to interrupt standard socket
 -- I\/O or file I\/O using this combinator.
-timeout :: (MonadCatch m, MonadIO m) => NominalDiffTime -> m a -> m (Maybe a)
+timeout :: (MonadMask m, MonadIO m) => NominalDiffTime -> m a -> m (Maybe a)
 timeout = (. const) . withTimeout
 
-withTimeout :: (MonadCatch m, MonadIO m) => NominalDiffTime -> (Timeout -> m a) -> m (Maybe a)
+withTimeout :: (MonadMask m, MonadIO m) => NominalDiffTime -> (Timeout -> m a) -> m (Maybe a)
 withTimeout t f | t <= 0 = return Nothing
                 | otherwise = do
     ex <- liftIO $ mdo
