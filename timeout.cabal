@@ -1,5 +1,5 @@
 Name:               timeout
-Version:            0.1.0
+Version:            0.1.1
 Synopsis:           Generalized sleep and timeout functions
 Description:        Generalized sleep and timeout functions
 License:            MIT

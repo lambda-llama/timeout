@@ -1,6 +1,12 @@
 timeout changelog
 =================
 
+0.1.1
+-----
+
+Technical release. Added support for exceptions 0.6.
+
+
 0.1.0
 -----
 
