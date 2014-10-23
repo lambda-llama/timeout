@@ -14,15 +14,18 @@ import Control.Monad (void)
 import Data.Typeable (Typeable)
 import Data.Word (Word64)
 import GHC.Conc (yield)
+import Unsafe.Coerce (unsafeCoerce)
 import System.IO.Unsafe (unsafePerformIO)
 
-import Control.Timeout.TimerManager.PSQ (PSQ, Elem(..))
+import Data.IntPSQ (IntPSQ)
+
+import qualified Data.IntPSQ as PSQ
+
 import Control.Timeout.Types (Timeout(..))
 import Control.Timeout.Unique (newUnique)
-import qualified Control.Timeout.TimerManager.PSQ as PSQ
 
-data Event = Register Timeout Int (IO ())
-           | Unregister Timeout
+data Event = Register Int Int (IO ())
+           | Unregister Int
     deriving (Typeable)
 
 instance Show Event where
@@ -30,17 +33,17 @@ instance Show Event where
 
 instance Exception Event
 
-type TimeoutQueue = PSQ (IO ())
+type TimeoutQueue = IntPSQ Int (IO ())
 
 tick :: (IO TimeoutQueue -> IO TimeoutQueue) -> TimeoutQueue -> IO TimeoutQueue
 tick restore queue = handle eventHandler $ restore $ do
-    let mbNext = PSQ.findMin queue
-    case mbNext of
-        Just (E { prio, value }) -> do
+    let mbView = PSQ.minView queue
+    case mbView of
+        Just (_, prio, value, rest) -> do
             now <- getMonotonicTime
             let diff = prio - now
             threadDelay diff >> eatException value
-            return $ PSQ.deleteMin queue
+            return $ rest
         Nothing -> threadDelay 1000000 >> return queue
   where
     eatException f = handle handleSomeException f
@@ -67,11 +70,11 @@ managerThread
 registerTimeout :: Int -> IO () -> IO Timeout
 registerTimeout time f = do
     timeout <- fmap Timeout newUnique
-    throwTo managerThread $ Register timeout time f
+    throwTo managerThread $ Register (unsafeCoerce timeout) time f
     return timeout
 
 unregisterTimeout :: Timeout -> IO ()
-unregisterTimeout t = throwTo managerThread $ Unregister t
+unregisterTimeout t = throwTo managerThread $ Unregister $ unsafeCoerce t
 
 foreign import ccall unsafe "getMonotonicNSec"
     getMonotonicNSec :: IO Word64

@@ -20,7 +20,7 @@ newtype SmallInterval = SmallInterval NominalDiffTime
     deriving (Show)
 
 instance Arbitrary SmallInterval where
-    arbitrary = fmap (SmallInterval . getPositive) $ suchThat arbitrary (< 1000)
+    arbitrary = fmap (SmallInterval . getPositive) $ suchThat arbitrary (< Positive 1000)
 
 instance Arbitrary NominalDiffTime where
     arbitrary = fmap fromInteger arbitrary
